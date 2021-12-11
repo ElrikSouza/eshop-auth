@@ -1,0 +1,7 @@
+{
+  "name": "eshop-auth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "ElrikSouza <72892051+ElrikSouza@users.noreply.github.com>",
+  "license": "MIT"
+}
