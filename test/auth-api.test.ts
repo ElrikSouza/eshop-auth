@@ -69,15 +69,15 @@ describe("Authentication api", () => {
     });
 
     describe("Sign up route", () => {
-        const signUp = testApp.post("/auth/sign-up");
+        const signUp = () => testApp.post("/auth/sign-up");
 
         it("should return 409 if the email is already being used", async () => {
-            const { statusCode } = await signUp.send(userAlreadyExists);
+            const { statusCode } = await signUp().send(userAlreadyExists);
             expect(statusCode).toBe(409);
         });
 
         it("should return 201 if the request succeded", async () => {
-            const { statusCode } = await signUp.send({
+            const { statusCode } = await signUp().send({
                 email: internet.exampleEmail(),
                 password: internet.password(10),
                 username: internet.userName(),
@@ -87,7 +87,7 @@ describe("Authentication api", () => {
         });
 
         it("should return 400 if there is a validation error", async () => {
-            const { statusCode } = await signUp.send({
+            const { statusCode } = await signUp().send({
                 email: internet.exampleEmail(),
                 password: internet.password(3),
                 username: internet.userName(),
