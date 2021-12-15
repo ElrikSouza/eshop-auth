@@ -13,3 +13,4 @@ const authController = new AuthController(authService);
 export const AuthModule = Router();
 
 AuthModule.post("/auth/sign-in", authController.signIn);
+AuthModule.post("/auth/sign-up", authController.signUp);

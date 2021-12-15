@@ -1,7 +1,12 @@
-import { Pool } from "pg";
-import { NotFoundError } from "../error/errors";
+import { Pool, DatabaseError } from "pg";
+import { v4 as uuid } from "uuid";
+import { ConflictError, NotFoundError } from "../error/errors";
 import { UserRepository } from "./user-repository.type";
-import { User } from "./user.type";
+import { SignUpData, User } from "./user.type";
+
+const userToArray = (user: SignUpData) => [uuid(), user.username, user.email, user.password];
+
+const UNIQUE_CONSTRAINT_VIOLATION = "23505";
 
 export class PgUserRepository implements UserRepository {
     constructor(private _dbPool: Pool) {}
@@ -23,7 +28,18 @@ export class PgUserRepository implements UserRepository {
         return credentials;
     };
 
-    public async create(): Promise<void> {
-        return;
-    }
+    public create = async (user: SignUpData): Promise<void> => {
+        try {
+            await this._dbPool.query(
+                "INSERT INTO user_account(id, username, email, password) values ($1, $2, $3, $4);",
+                userToArray(user)
+            );
+        } catch (error) {
+            if (error instanceof DatabaseError && error.code === UNIQUE_CONSTRAINT_VIOLATION) {
+                throw new ConflictError("Email already in use");
+            }
+
+            throw error;
+        }
+    };
 }

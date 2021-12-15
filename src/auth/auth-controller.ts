@@ -10,4 +10,9 @@ export class AuthController implements GenericAuthController {
         const { token } = await this._authService.signIn(req.body);
         return res.status(200).send({ token });
     });
+
+    public signUp = wrapRoute(async (req: Request, res: Response) => {
+        await this._authService.signUp(req.body);
+        return res.status(201).send({ message: "user has been created." });
+    });
 }

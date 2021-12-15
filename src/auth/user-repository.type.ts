@@ -1,6 +1,6 @@
-import { User } from "./user.type";
+import { SignUpData, User } from "./user.type";
 
 export interface UserRepository {
-    create(): Promise<void>;
+    create(user: SignUpData): Promise<void>;
     getCredentials(email: string): Promise<Pick<User, "id" | "email" | "password">>;
 }
