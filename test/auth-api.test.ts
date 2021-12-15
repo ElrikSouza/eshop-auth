@@ -2,7 +2,7 @@ import supertest from "supertest";
 import { app } from "../src/app";
 import { random, internet } from "faker";
 import { db } from "../src/db";
-import { hashSync } from "bcrypt";
+import { v4 } from "uuid";
 
 const notFoundUser = {
     email: "notfound@example.com",
@@ -11,7 +11,7 @@ const notFoundUser = {
 
 const userAlreadyExists = {
     email: "alreadyexists@example.com",
-    password: hashSync("12345678", 1),
+    password: "$2b$04$D37rWA6KhwRx.ilg8SbJ.ugqCpBleWAbTTHvwkI4UZhAsfns8UYb2",
     username: "Yi test",
 };
 
@@ -19,14 +19,10 @@ describe("Authentication api", () => {
     const testApp = supertest(app);
 
     beforeAll(async () => {
-        await db.query("DELETE FROM user;");
+        await db.query("DELETE FROM user_account;");
         await db.query(
-            "INSERT INTO user(username, email, password) values ($1, $2, $3)",
-            [
-                userAlreadyExists.username,
-                userAlreadyExists.email,
-                userAlreadyExists.password,
-            ]
+            "INSERT INTO user_account(id, username, email, password) values ($1, $2, $3, $4);",
+            [v4(), userAlreadyExists.username, userAlreadyExists.email, userAlreadyExists.password]
         );
     });
 
@@ -34,9 +30,10 @@ describe("Authentication api", () => {
         const signIn = () => testApp.post("/auth/sign-in");
 
         it("should return 404 if the user does not exist", async () => {
-            const result = await signIn().send(notFoundUser);
+            const { body, statusCode } = await signIn().send(notFoundUser);
 
-            expect(result.statusCode).toBe(404);
+            expect(statusCode).toBe(404);
+            expect(body).toHaveProperty("message");
         });
 
         it("should return 200 and a token if the request was successful", async () => {
@@ -57,6 +54,17 @@ describe("Authentication api", () => {
 
             expect(statusCode).toBe(403);
             expect(body.token).toBeUndefined();
+            expect(body).toHaveProperty("message");
+        });
+
+        it("should return 400 if there's an invalid field", async () => {
+            const { body, statusCode } = await signIn().send({
+                email: "notaemail",
+                password: "012345678",
+            });
+
+            expect(statusCode).toBe(400);
+            expect(body).toHaveProperty("message");
         });
     });
 
