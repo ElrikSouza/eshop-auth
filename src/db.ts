@@ -1,12 +1,12 @@
 import { Pool } from "pg";
 import { envVars } from "./env";
 
-const connectionString =
-    envVars.NODE_ENV === "PRODUCTION"
-        ? envVars.DB_CONNECTION_STRING
-        : envVars.DB_CONNECTION_STRING_TEST;
+const nodeEnv = envVars.NODE_ENV.toLowerCase();
 
-const SSL = envVars.NODE_ENV !== "TEST" && envVars.NODE_ENV !== "LOCAL";
+const connectionString =
+    nodeEnv === "production" ? envVars.DB_CONNECTION_STRING : envVars.DB_CONNECTION_STRING_TEST;
+
+const SSL = nodeEnv !== "test" && nodeEnv !== "local";
 
 const config = {
     connectionString,
